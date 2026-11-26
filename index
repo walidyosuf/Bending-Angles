@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>حاسبة فرق الطول بعد تكسيح الزوايا</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#e8ece6;--panel:#f6f8f4;--ink:#16293d;--mut:#5b6b78;--line:#b9c4bd;--acc:#c4500c;--ok:#1f6f4a;--neg:#9b2c2c;--pos:#1f5f8f;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10181f;--panel:#17222b;--ink:#e4ebe6;--mut:#9aabb6;--line:#2c3b46;--acc:#f08a4b;--ok:#6fd1a0;--neg:#f08a8a;--pos:#7fbdf0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10181f;--panel:#17222b;--ink:#e4ebe6;--mut:#9aabb6;--line:#2c3b46;--acc:#f08a4b;--ok:#6fd1a0;--neg:#f08a8a;--pos:#7fbdf0;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.7 Cairo,"Segoe UI",Tahoma,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.5rem;font-weight:800;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px}
+label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 3px}
+input,select{width:100%;padding:8px 10px;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{color:var(--mut);font-size:.8rem;margin-top:2px}
+.res{border-inline-start:6px solid var(--acc)}
+#big{font-size:2.6rem;font-weight:800;line-height:1.2;direction:ltr;text-align:right}
+#msg{font-weight:600;margin:2px 0 10px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+td{padding:5px 0;border-top:1px solid var(--line)}td:last-child{text-align:left;direction:ltr;font-variant-numeric:tabular-nums}
+button{font:inherit;font-weight:600;padding:8px 14px;border-radius:4px;border:1px solid var(--acc);background:transparent;color:var(--acc);cursor:pointer;margin-top:12px}
+svg{width:100%;height:auto;display:block;margin-top:10px}
+.legend{margin-top:8px;font-size:.88rem;line-height:1.9}.legend div{display:flex;align-items:center;gap:8px}.legend i{flex:none;width:34px;height:0;border-top:3px solid var(--ink)}.legend i.d{border-top:2px dashed var(--acc)}
+footer{max-width:980px;margin:0 auto;padding:12px 16px 24px;text-align:center;direction:ltr;color:var(--mut);font-size:.85rem;border-top:1px solid var(--line)}
+.note{font-size:.82rem;color:var(--mut);margin-top:12px}
+</style>
+</head>
+<body>
+<main>
+<h1>حاسبة فرق الطول بعد تكسيح الزوايا</h1>
+<p class="sub">للزوايا متساوية الساقين. تُظهر الفرق بين طول القص وبُعد الرسم المقاس على خط المرجع.</p>
+<div class="grid">
+<section class="panel">
+ <div class="row">
+  <div><label for="a">القطاع L (مم)</label><select id="a"></select></div>
+  <div><label for="t">السمك (مم)</label><input id="t" type="number" placeholder="مثال: 13" min="3" max="40" step="0.5"></div>
+ </div>
+ <label for="g">نوع الصلب</label><select id="g"></select>
+ <div class="row">
+  <div><label for="m">نوع قيمة الزاوية</label><select id="m"><option value="inc">الزاوية المحصورة A (مثل 168.9°)</option><option value="dev">زاوية الانحراف φ</option></select></div>
+  <div><label for="ang">قيمة الزاوية (°)</label><input id="ang" type="number" placeholder="مثال: 168.9" step="0.1"></div>
+ </div>
+ <label for="pl">مستوى التكسيح</label>
+ <select id="pl"><option value="d">في مستوى القُطر (الساقان متماثلتان)</option><option value="l">في مستوى إحدى الساقين</option></select>
+ <div class="row">
+  <div><label for="ref">خط المرجع للأبعاد</label><select id="ref"><option value="h">الكعب</option><option value="t">طرف الساق</option><option value="c">مركز الثقل</option></select></div>
+  <div><label for="side">موضع الكعب في التكسيح</label><select id="side"><option value="in">داخل الانحناء</option><option value="out">خارج الانحناء</option></select></div>
+ </div>
+ <button id="run" type="button">تنفيذ</button>
+</section>
+<section class="panel res">
+ <div id="big">—</div><div id="msg">أدخل البيانات ثم اضغط «تنفيذ».</div>
+ <table id="tb"></table>
+ <svg id="dg" viewBox="0 0 400 120" role="img" aria-label="رسم توضيحي لخط المرجع والمحور المتعادل"></svg>
+ <div id="lg" class="legend"></div>
+</section>
+</div>
+</main>
+<footer>Created by Walid Ahmed Yosuf @2026</footer>
+<script>
+const G={"S235":[235,360],"S275":[275,430],"S355":[355,510]};
+const $=i=>document.getElementById(i),E=210000;
+$("a").add(new Option("اختر القطاع",""));
+[40,45,50,60,63,70,75,80,90,100,110,120,125,130,140,150,160,180,200,250].forEach(v=>$("a").add(new Option("L"+v,v)));
+$("g").add(new Option("اختر نوع الصلب (اختياري)",""));
+Object.keys(G).forEach(k=>$("g").add(new Option(k,k)));
+$("a").value="";$("g").value="";
+const f=(x,d=1)=>(Math.abs(x)<0.05?0:x).toFixed(d);
+function calc(){
+ if($("a").value===""||$("t").value===""||$("ang").value===""){$("big").textContent="—";$("big").style.color="";$("msg").textContent="أكمل الحقول المطلوبة: القطاع والسمك وقيمة الزاوية.";$("tb").innerHTML="";$("dg").innerHTML="";$("lg").innerHTML="";return}
+ const a=+$("a").value,t=+$("t").value,k=1;
+ let A=+$("ang").value;let phi=$("m").value==="inc"?180-A:A;
+ if(!(t>0&&t<a/2)||!(phi>=0&&phi<90)||!(k>=0)){$("big").textContent="—";$("msg").textContent="راجع المدخلات: السمك أقل من نصف الساق، والانحراف بين 0° و90°.";return}
+ const ex=(a*a+a*t-t*t)/(2*(2*a-t)),p=phi*Math.PI/180,diag=$("pl").value==="d";
+ const pf=diag?Math.atan(Math.tan(p)*Math.SQRT1_2):p;
+ const off={h:ex,t:-(a-ex),c:0}[$("ref").value]*($("side").value==="in"?1:-1);
+ const d=k*2*off*Math.tan(pf/2);
+ const alt=($("ref").value==="h"&&diag)?k*2*($("side").value==="in"?1:-1)*ex*Math.SQRT2*Math.tan(p/2):null;
+ $("big").textContent=(d>0.049?"+":d<-0.049?"−":"")+f(Math.abs(d))+" mm";
+ $("big").style.color=d>0.049?"var(--pos)":d<-0.049?"var(--neg)":"var(--ok)";
+ $("msg").textContent=d>0.049?"استطالة: يُقصّ القطاع أطول من البُعد المرسوم":d<-0.049?"انكماش: يُقصّ القطاع أقصر من البُعد المرسوم":"لا فرق يُذكر في الطول";
+ const g=G[$("g").value];
+ const rows=[["زاوية الانحراف φ",f(phi,2)+"°"],["الزاوية الظاهرة على وجه الساق",f(pf*180/Math.PI,2)+"°"],["بُعد المحور المتعادل عن كعب الزاوية (ex)",f(ex)+" مم"],["بُعد المحور المتعادل عن طرف الساق",f(a-ex)+" مم"],["بُعد خط المرجع عن المحور المتعادل",f(Math.abs(off))+" مم"]];
+ if(alt!==null)rows.push(["قيمة بديلة (بُعد الكعب ثلاثي الأبعاد)",(alt>=0?"+":"−")+f(Math.abs(alt))+" مم"]);
+ if(g)rows.push(["حد الخضوع / الشد "+$("g").value,g[0]+" / "+g[1]+" MPa"]);
+ $("tb").innerHTML=rows.map(r=>"<tr><td>"+r[0]+"</td><td>"+r[1]+"</td></tr>").join("");
+ draw(pf,off>=0?1:-1);
+ $("lg").innerHTML='<div><i></i><span>خط متصل: المحور المتعادل (طوله = طول القص)</span></div><div><i class="d"></i><span>خط متقطع: خط المرجع (بُعد الرسم). الزاوية مكبّرة للتوضيح</span></div>';
+}
+function draw(pf,s){
+ const th=Math.min(Math.max(pf*3,0.12),0.6),P0=[30,95],P1=[190,95],P2=[190+170*Math.cos(th),95-170*Math.sin(th)],D=28;
+ const n1=[0,-1],n2=[-Math.sin(th),-Math.cos(th)],b=[n1[0]+n2[0],n1[1]+n2[1]],bl=Math.hypot(...b),c=Math.cos(th/2);
+ const ap=[P1[0]+s*D/c*b[0]/bl,P1[1]+s*D/c*b[1]/bl],r0=[P0[0]+s*D*n1[0],P0[1]+s*D*n1[1]],r2=[P2[0]+s*D*n2[0],P2[1]+s*D*n2[1]];
+ const pt=q=>q.map(v=>v.toFixed(1)).join(",");
+ $("dg").innerHTML='<polyline points="'+pt(P0)+' '+pt(P1)+' '+pt(P2)+'" fill="none" stroke="currentColor" stroke-width="3"/><polyline points="'+pt(r0)+' '+pt(ap)+' '+pt(r2)+'" fill="none" stroke="var(--acc)" stroke-width="2" stroke-dasharray="6 4"/>';
+}
+$("run").onclick=calc;
+</script>
+</body>
+</html>
